@@ -15,6 +15,7 @@
   --ink-hover: #000000;
   --white: #FFFFFF;
   --hero-fallback: #3A3630;
+  --backdrop-dim: rgba(0, 0, 0, 0.62);   /* mörkning av helskärmsbilden bakom kolumnen */
   --size-hover: #F3EADF;
   --gutter: 32px;       /* sidomarginal, samma vänster och höger */
   --font-display: "ATG Rubrik", "ATG Text", Arial, sans-serif;
@@ -31,7 +32,26 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Bredare skärmar än kolumnen: hero-bilden i helskärm, mörkad, bakom kolumnen */
+@media (min-width: 561px) {
+  html { background: var(--hero-fallback); }
+  body { background: transparent; }   /* annars målas body-färgen över bilden */
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--hero-fallback);
+    background-image: linear-gradient(var(--backdrop-dim), var(--backdrop-dim)), url("img/hero@2x.jpg");
+    background-size: cover;
+    background-position: 50% 70%;
+    background-repeat: no-repeat;
+  }
+}
+
 .page {
+  position: relative;
   width: 100%;
   max-width: 560px;
   min-height: 100vh;

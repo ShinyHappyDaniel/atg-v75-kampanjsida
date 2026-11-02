@@ -31,6 +31,7 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 ## Designbeslut från mockupen
 
 - Bredd 390 px som referens, max 560 px, centrerad. Sidomarginal 32 px (`--gutter`).
+- Bredare skärmar: hero-bilden ligger fast i helskärm bakom kolumnen, mörkad med `--backdrop-dim` (62 % svart).
 - Bakgrund `#FCF3E8`, text `#1A1A1A`, fält vita.
 - Hero 230 px hög, bilden skalad 136 % och ankrad i nederkant. Rubrik ATG Rubrik 25 px, versaler.
 - Intro-rubrik ATG Text ExtraBold Italic 20 px. Brödtext 17,3 px. Hårda radbrytningar vid 390 px och bredare, under 389 px bryts texten fritt.
