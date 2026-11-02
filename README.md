@@ -31,6 +31,7 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 ## Designbeslut från mockupen
 
 - Bredd 390 px som referens, max 560 px, centrerad. Sidomarginal 32 px (`--gutter`).
+- Alla mått står i designpixlar (`--u`) och skalar med kolumnen: 1 px vid 390 px bredd, 1,44 px vid 560. Sidan ser då ut som skissen på varje bredd. Under 390 px står måtten still och texten bryts fritt.
 - Bredare skärmar: hero-bilden ligger fast i helskärm bakom kolumnen, mörkad med `--backdrop-dim` (62 % svart).
 - Bakgrund `#FCF3E8`, text `#1A1A1A`, fält vita.
 - Hero 230 px hög, bilden skalad 136 % och ankrad i nederkant. Rubrik ATG Rubrik 25 px, versaler.
