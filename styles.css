@@ -1,0 +1,261 @@
+/* ATG V75: kampanjsida (t-shirt)
+   Typsnitt: ATG Rubrik (hero-rubrik), ATG Text (allt annat). */
+
+@font-face { font-family: "ATG Rubrik"; src: url("fonts/ATGRubrik.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "ATG Text"; src: url("fonts/ATGText-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "ATG Text"; src: url("fonts/ATGText-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "ATG Text"; src: url("fonts/ATGText-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "ATG Text"; src: url("fonts/ATGText-BoldItalic.woff2") format("woff2"); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: "ATG Text"; src: url("fonts/ATGText-ExtraBold.woff2") format("woff2"); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "ATG Text"; src: url("fonts/ATGText-ExtraBoldItalic.woff2") format("woff2"); font-weight: 800; font-style: italic; font-display: swap; }
+
+:root {
+  --bg: #FCF3E8;        /* cream */
+  --ink: #1A1A1A;
+  --ink-hover: #000000;
+  --white: #FFFFFF;
+  --hero-fallback: #3A3630;
+  --size-hover: #F3EADF;
+  --gutter: 32px;       /* sidomarginal, samma vänster och höger */
+  --font-display: "ATG Rubrik", "ATG Text", Arial, sans-serif;
+  --font-text: "ATG Text", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; background: var(--bg); }
+
+body {
+  font-family: var(--font-text);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  width: 100%;
+  max-width: 560px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  height: 230px;
+  padding: 24px var(--gutter) 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--hero-fallback);
+  background-image: url("img/hero.jpg");
+  background-image: -webkit-image-set(url("img/hero.jpg") 1x, url("img/hero@2x.jpg") 2x);
+  background-image: image-set(url("img/hero.jpg") 1x, url("img/hero@2x.jpg") 2x);
+  background-size: 136% auto;       /* samma utsnitt som mockupen vid 390 px */
+  background-position: 49% 100%;
+  background-repeat: no-repeat;
+}
+
+.hero__logo {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 54px;
+  height: auto;
+}
+
+.hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--white);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* Innehåll */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px var(--gutter) 32px;
+}
+
+.intro { display: flex; flex-direction: column; gap: 14px; }
+
+.intro__title {
+  margin: 0;
+  font-weight: 800;
+  font-style: italic;
+  font-size: 20px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.intro__text {
+  margin: 0;
+  font-size: 17.3px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+/* Storlek */
+.form { display: flex; flex-direction: column; gap: 22px; }
+
+.sizes {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sizes__image {
+  width: 70%;
+  max-width: 276px;
+  min-width: 0;
+  height: auto;
+  flex: 0 1 auto;
+}
+
+.sizes__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.size {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 22px;
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.size input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: 0 0 auto;
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  background: var(--white);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.size:hover input:not(:checked):not(:disabled) { background: var(--size-hover); }
+.size input:checked::before { content: ""; width: 10px; height: 10px; background: var(--ink); }
+.size input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* Fält */
+.fields { display: flex; flex-direction: column; gap: 10px; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  min-height: 60px;
+  padding: 12px 10px 8px;
+  background: var(--white);
+}
+.field:focus-within { box-shadow: 0 0 0 2px var(--ink); }
+
+.field input {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font-text);
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.field label { font-size: 10px; line-height: 1; }
+
+/* Spamfälla: utanför skärmen, aldrig synlig */
+.trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Villkor och knapp */
+.terms { display: flex; flex-direction: column; gap: 8px; }
+
+.disclaimer {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: center;
+  white-space: nowrap;
+}
+.disclaimer--privacy { white-space: normal; }
+
+.submit {
+  appearance: none;
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--white);
+  font-family: var(--font-text);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.submit:hover:not(:disabled) { background: var(--ink-hover); }
+.submit:active:not(:disabled) { transform: translateY(1px); }
+.submit:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.submit:disabled { cursor: default; }
+
+.status {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.nobr { white-space: nowrap; }   /* bryt aldrig "t-shirten" vid bindestrecket */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Smalare skärmar än 390 px: låt texterna brytas naturligt.
+   Hero-rubriken behåller sin brytning efter "tillbaka." men får radbrytas om den inte ryms.
+   Mellanslaget före varje <br> i HTML:en håller isär orden när brytningen tas bort. */
+@media (max-width: 389px) {
+  .hero__title, .intro__title, .intro__text, .disclaimer { white-space: normal; }
+  .intro__title br, .intro__text br, .disclaimer br { display: none; }
+}
