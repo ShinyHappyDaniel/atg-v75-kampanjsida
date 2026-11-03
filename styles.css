@@ -21,7 +21,11 @@
   --white: #FFFFFF;
   --hero-fallback: #3A3630;
   --backdrop-dim: rgba(0, 0, 0, 0.62);   /* mörkning av helskärmsbilden bakom kolumnen */
-  --size-hover: #F3EADF;
+  --chip-hover: #F2E6D8;
+  --peach: #F3B692;     /* färgprov t-shirt */
+  --offwhite: #F3EBD6;
+  --swatch-edge: rgba(26, 26, 26, 0.35);
+  --lightbox-bg: rgba(10, 8, 6, 0.94);
 
   --column: 560px;                                                   /* kolumnens maxbredd */
   --u: clamp(1px, calc(100vw / 390), calc(var(--column) / 390));     /* 1 designpixel */
@@ -57,6 +61,8 @@ body {
     background-position: 50% 70%;
     background-repeat: no-repeat;
   }
+
+  .page { box-shadow: 0 0 60px rgba(0, 0, 0, 0.5); }
 }
 
 .page {
@@ -117,6 +123,8 @@ body {
   padding: calc(28 * var(--u)) var(--gutter) calc(32 * var(--u));
 }
 
+.content--soldout { padding: calc(40 * var(--u)) var(--gutter) calc(48 * var(--u)); }
+
 .intro { display: flex; flex-direction: column; gap: calc(14 * var(--u)); }
 
 .intro__title {
@@ -135,63 +143,150 @@ body {
   white-space: nowrap;
 }
 
-/* Storlek */
-.form { display: flex; flex-direction: column; gap: calc(22 * var(--u)); }
+.intro__title--wrap { white-space: normal; line-height: 1.3; }
+.intro__text--wrap { white-space: normal; }
 
-.sizes {
+/* Foton */
+.photos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: calc(10 * var(--u));
+}
+
+.photo {
+  appearance: none;
+  -webkit-appearance: none;
   margin: 0;
   padding: 0;
   border: 0;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: calc(16 * var(--u));
+  background: none;
+  border-radius: calc(4 * var(--u));
+  cursor: zoom-in;
+  display: block;
 }
-
-.sizes__image {
-  width: 70%;
-  max-width: calc(276 * var(--u));
-  min-width: 0;
+.photo img {
+  width: 100%;
   height: auto;
-  flex: 0 1 auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 60%;
+  border-radius: calc(4 * var(--u));
+  display: block;
 }
+.photo:hover img { filter: brightness(0.95); }
+.photo:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
-.sizes__list {
-  display: flex;
-  flex-direction: column;
-  gap: calc(4 * var(--u));
-  flex: 0 0 auto;
-}
-
-.size {
+/* Lightbox: fast i px, den täcker hela skärmen och följer inte kolumnen */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--lightbox-bg);
   display: flex;
   align-items: center;
-  gap: calc(9 * var(--u));
-  min-height: calc(22 * var(--u));
-  font-size: calc(16 * var(--u));
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
+  justify-content: center;
+  padding: 16px;
 }
+.lightbox[hidden] { display: none; }
 
-.size input {
+.lightbox__backdrop {
+  position: absolute;
+  inset: 0;
   appearance: none;
   -webkit-appearance: none;
-  width: calc(18 * var(--u));
-  height: calc(18 * var(--u));
-  margin: 0;
-  flex: 0 0 auto;
-  border: calc(1.5 * var(--u)) solid var(--ink);
-  border-radius: calc(2 * var(--u));
-  background: var(--white);
-  display: grid;
-  place-content: center;
-  cursor: pointer;
-  transition: background 0.15s;
+  border: 0;
+  background: transparent;
+  cursor: zoom-out;
 }
-.size:hover input:not(:checked):not(:disabled) { background: var(--size-hover); }
-.size input:checked::before { content: ""; width: calc(10 * var(--u)); height: calc(10 * var(--u)); background: var(--ink); }
-.size input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.lightbox__img {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.lightbox__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.lightbox__close:hover { background: rgba(255, 255, 255, 0.22); }
+.lightbox__close:focus-visible { outline: 2px solid var(--white); outline-offset: 2px; }
+
+/* Färg- och storleksval */
+.form { display: flex; flex-direction: column; gap: calc(22 * var(--u)); }
+
+.choice { margin: 0; padding: 0; border: 0; min-width: 0; }
+
+.choice__legend {
+  padding: 0;
+  margin: 0 0 calc(8 * var(--u));
+  font-size: calc(11 * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.choice__row { display: flex; gap: calc(8 * var(--u)); }
+
+.chip { flex: 1 1 0; min-width: 0; position: relative; }
+
+.chip input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+
+.chip__face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10 * var(--u));
+  min-height: calc(48 * var(--u));
+  border: calc(1 * var(--u)) solid var(--ink);
+  border-radius: calc(4 * var(--u));
+  background: var(--white);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: calc(15 * var(--u));
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, transform 0.1s;
+}
+.chip:hover input:not(:checked):not(:disabled) + .chip__face { background: var(--chip-hover); }
+.chip:active input:not(:disabled) + .chip__face { transform: translateY(1px); }
+.chip input:checked + .chip__face { background: var(--ink); color: var(--white); }
+.chip input:focus-visible + .chip__face { outline: 2px solid var(--ink); outline-offset: 2px; }
+.chip input:disabled + .chip__face { cursor: default; }
+
+.swatch {
+  width: calc(16 * var(--u));
+  height: calc(16 * var(--u));
+  border-radius: 50%;
+  border: calc(1 * var(--u)) solid var(--swatch-edge);
+  flex: 0 0 auto;
+}
+.swatch--peach { background: var(--peach); }
+.swatch--offwhite { background: var(--offwhite); }
 
 /* Fält */
 .fields { display: flex; flex-direction: column; gap: calc(10 * var(--u)); }
@@ -229,17 +324,22 @@ body {
   overflow: hidden;
 }
 
-/* Villkor och knapp */
-.terms { display: flex; flex-direction: column; gap: calc(8 * var(--u)); }
+/* Lagertext, villkor och knapp */
+.stock {
+  margin: 0;
+  font-weight: 700;
+  font-style: italic;
+  font-size: calc(14 * var(--u));
+  line-height: 1.4;
+  text-align: center;
+}
 
 .disclaimer {
-  margin: 0;
-  font-size: calc(12 * var(--u));
-  line-height: 1.35;
+  margin: calc(-8 * var(--u)) 0 0;
+  font-size: calc(10 * var(--u));   /* samma som fältetiketterna */
+  line-height: 1.4;
   text-align: center;
-  white-space: nowrap;
 }
-.disclaimer--privacy { white-space: normal; }
 
 .submit {
   appearance: none;
@@ -272,19 +372,10 @@ body {
 
 .nobr { white-space: nowrap; }   /* bryt aldrig "t-shirten" vid bindestrecket */
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
 /* Smalare skärmar än 390 px: måtten står still (1 designpixel = 1 px) och texterna bryts naturligt.
    Hero-rubriken behåller sin brytning efter "tillbaka." men får radbrytas om den inte ryms.
    Mellanslaget före varje <br> i HTML:en håller isär orden när brytningen tas bort. */
 @media (max-width: 389px) {
-  .hero__title, .intro__title, .intro__text, .disclaimer { white-space: normal; }
-  .intro__title br, .intro__text br, .disclaimer br { display: none; }
+  .hero__title, .intro__title, .intro__text { white-space: normal; }
+  .intro__title br, .intro__text br { display: none; }
 }

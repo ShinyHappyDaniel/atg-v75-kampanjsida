@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- När de 100 t-shirtarna är slut: ta bort kommentaren runt raden nedan, så skickas alla till slut.html. -->
+  <!-- <meta http-equiv="refresh" content="0; url=slut.html"> -->
   <title>V75 är tillbaka. Hämta din t-shirt | ATG</title>
   <meta name="description" content="Snyggt! Du plockade en av vinnarna och belönas därför med en t-shirt.">
   <meta name="robots" content="noindex, nofollow">
@@ -23,10 +25,10 @@
   <link rel="preload" href="fonts/ATGRubrik.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-ExtraBoldItalic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
-  <div class="page">
+  <div class="page" id="page">
 
     <header class="hero">
       <img class="hero__logo" src="img/atg-logo.png" width="54" height="22" alt="ATG">
@@ -37,20 +39,42 @@
 
       <div class="intro">
         <h2 class="intro__title">Snyggt! Du plockade en av vinnarna <br>och belönas därför med en t-shirt.</h2>
-        <p class="intro__text">Ange din storlek nedan och till vilken adress <br>du vill att vi skickar <span class="nobr">t-shirten.</span></p>
+        <p class="intro__text">Ange färg och storlek nedan och till vilken <br>adress du vill att vi skickar <span class="nobr">t-shirten.</span></p>
+      </div>
+
+      <div class="photos">
+        <button type="button" class="photo" data-lightbox="img/tshirt-peach.jpg" data-alt="Modell i persikofärgad t-shirt med Copiad-tryck" aria-label="Visa persikofärgad t-shirt i helskärm">
+          <img src="img/tshirt-peach.jpg" width="746" height="746" decoding="async" alt="Modell i persikofärgad t-shirt med Copiad-tryck">
+        </button>
+        <button type="button" class="photo" data-lightbox="img/tshirt-offwhite.jpg" data-alt="Modell i offwhite t-shirt med Copiad-tryck" aria-label="Visa offwhite t-shirt i helskärm">
+          <img src="img/tshirt-offwhite.jpg" width="746" height="746" decoding="async" alt="Modell i offwhite t-shirt med Copiad-tryck">
+        </button>
       </div>
 
       <form class="form" id="tshirt-form" novalidate>
 
-        <fieldset class="sizes">
-          <legend class="visually-hidden">Storlek</legend>
-          <img class="sizes__image" src="img/tshirt.png" width="422" height="455" alt="Vit t-shirt med San Moteur-tryck">
-          <div class="sizes__list">
-            <label class="size"><input type="radio" name="storlek" value="x-small" required> <span>x-small</span></label>
-            <label class="size"><input type="radio" name="storlek" value="small"> <span>small</span></label>
-            <label class="size"><input type="radio" name="storlek" value="medium"> <span>medium</span></label>
-            <label class="size"><input type="radio" name="storlek" value="large"> <span>large</span></label>
-            <label class="size"><input type="radio" name="storlek" value="x-large"> <span>x-large</span></label>
+        <fieldset class="choice">
+          <legend class="choice__legend">Välj färg</legend>
+          <div class="choice__row">
+            <label class="chip chip--color">
+              <input type="radio" name="farg" value="peach" required>
+              <span class="chip__face"><span class="swatch swatch--peach"></span>Peach</span>
+            </label>
+            <label class="chip chip--color">
+              <input type="radio" name="farg" value="offwhite">
+              <span class="chip__face"><span class="swatch swatch--offwhite"></span>Offwhite</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="choice">
+          <legend class="choice__legend">Välj storlek</legend>
+          <div class="choice__row">
+            <label class="chip"><input type="radio" name="storlek" value="xs" required><span class="chip__face">XS</span></label>
+            <label class="chip"><input type="radio" name="storlek" value="s"><span class="chip__face">S</span></label>
+            <label class="chip"><input type="radio" name="storlek" value="m"><span class="chip__face">M</span></label>
+            <label class="chip"><input type="radio" name="storlek" value="l"><span class="chip__face">L</span></label>
+            <label class="chip"><input type="radio" name="storlek" value="xl"><span class="chip__face">XL</span></label>
           </div>
         </fieldset>
 
@@ -83,10 +107,9 @@
           <input id="f-honey" name="_honey" type="text" tabindex="-1" autocomplete="off">
         </div>
 
-        <div class="terms">
-          <p class="disclaimer">Endast en t-shirt per tävlande och t-shirten skickas <br>endast inom Sverige</p>
-          <p class="disclaimer disclaimer--privacy">Vi använder dina uppgifter bara för att skicka <span class="nobr">t-shirten.</span></p>
-        </div>
+        <p class="stock">De 100 första som skickar in detta formulär vinner en t-shirt. Sedan är lagret slut.</p>
+
+        <p class="disclaimer">Endast en t-shirt per tävlande och t-shirten skickas endast inom Sverige. <br>Vi använder dina uppgifter bara för att skicka <span class="nobr">t-shirten.</span></p>
 
         <button class="submit" type="submit">Skicka</button>
 
@@ -96,6 +119,15 @@
     </main>
   </div>
 
-  <script src="script.js?v=1"></script>
+  <!-- Helskärmsvisning av bild -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Förstorad bild" hidden>
+    <button type="button" class="lightbox__backdrop" id="lightbox-backdrop" aria-label="Stäng"></button>
+    <img class="lightbox__img" id="lightbox-img" alt="">
+    <button type="button" class="lightbox__close" id="lightbox-close" aria-label="Stäng förstorad bild">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M3 3L19 19M19 3L3 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <script src="script.js?v=2"></script>
 </body>
 </html>
