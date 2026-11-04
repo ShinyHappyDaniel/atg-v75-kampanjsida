@@ -3,8 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Döljer innehållet tills databasen svarat om t-shirtarna är slut (script.js tar bort klassen). -->
+  <!-- Frågar databasen direkt om t-shirtarna är slut och döljer innehållet tills svaret kommit.
+       Är det slut visar script.js slutsidans text här direkt, utan att formuläret syns. -->
   <script>document.documentElement.classList.add('kollar');</script>
+  <link rel="preconnect" href="https://nkfxqteujqatmzwbnxrn.supabase.co" crossorigin>
+  <script src="db.js?v=1"></script>
   <title>V75 är tillbaka. Hämta din t-shirt | ATG</title>
   <meta name="description" content="Snyggt! Du plockade en av vinnarna och belönas därför med en t-shirt.">
   <meta name="robots" content="noindex, nofollow">
@@ -25,8 +28,7 @@
   <link rel="preload" href="fonts/ATGRubrik.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-ExtraBoldItalic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preconnect" href="https://nkfxqteujqatmzwbnxrn.supabase.co" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
   <div class="page" id="page">
@@ -36,7 +38,13 @@
       <h1 class="hero__title">V75 är tillbaka.<br>Med ny energi.</h1>
     </header>
 
-    <main class="content">
+    <!-- Visas när t-shirtarna är slut. Samma text som slut.html. -->
+    <main class="content content--soldout" id="slut-innehall" hidden>
+      <h2 class="intro__title intro__title--wrap">Oj vad snabbt ni plockade de 100 vinnarna! Alla t-shirts är nu slut.</h2>
+      <p class="intro__text intro__text--wrap">Hoppas du har bättre flyt på V75 i morgon. Lycka till!</p>
+    </main>
+
+    <main class="content" id="start-innehall">
 
       <div class="intro">
         <h2 class="intro__title">Snyggt! Du plockade en av vinnarna <br>och belönas därför med en t-shirt.</h2>
@@ -129,6 +137,6 @@
     </button>
   </div>
 
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>

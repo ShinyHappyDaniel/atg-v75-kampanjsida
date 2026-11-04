@@ -127,6 +127,7 @@ body {
 
 /* Medan sidan frågar databasen om t-shirtarna är slut: dölj innehållet, behåll hero och layout */
 .kollar .content { visibility: hidden; }
+.content[hidden] { display: none; }   /* start- eller slutinnehållet, bara ett i taget */
 
 .intro { display: flex; flex-direction: column; gap: calc(14 * var(--u)); }
 

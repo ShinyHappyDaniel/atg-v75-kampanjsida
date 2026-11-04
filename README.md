@@ -7,9 +7,10 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 ## Databasen (Supabase)
 
 - Projekt `atg-v75` (ref `nkfxqteujqatmzwbnxrn`, Stockholm) i organisationen Shiny Happy People. SQL:en som bygger den ligger hos SHP (`atg-databas-26-11-04.sql` i projektmappen) och kan köras om.
-- Sidan anropar bara två funktioner med den publika nyckeln i `script.js`:
-  - `tshirt_status()` när sidan laddas. Är det slut skickas besökaren till `slut.html`. Innehållet är dolt tills svaret kommit, högst 3 sekunder.
-  - `anmal_tshirt(...)` vid Skicka. Svarar `ok`, `slut`, `dubblett` eller `ogiltig`.
+- Adress och publik nyckel står i `db.js`, som laddas överst i `<head>` och genast frågar databasen. Sidan anropar bara två funktioner:
+  - `tshirt_status()` innan sidan ritas. Är det slut visar `index.html` slutsidans text direkt på samma sida och adressen byts till `slut.html`. Formuläret ritas aldrig. Innehållet under heron är dolt tills svaret kommit, högst 3 sekunder.
+  - `anmal_tshirt(...)` vid Skicka. Svarar `ok`, `slut`, `dubblett` eller `ogiltig`. Vid `slut` byts sidan till sluttexten på samma sätt.
+- `slut.html` frågar också: har platser öppnats igen (efter ett test eller ett raderat inskick) skickas besökaren tillbaka till formuläret.
 - Databasen släpper in exakt `max_antal` inskick (tabellen `kampanj`), även när många skickar samtidigt. En t-shirt per e-postadress.
 - Den publika nyckeln kan inte läsa listan eller ändra gränsen. Listan läses i Supabase-panelen: Table Editor, `anmalningar`, Export to CSV.
 - Antalet räknas ur raderna. Raderas ett fejkat inskick öppnas platsen igen.
@@ -31,10 +32,11 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 
 | Fil | Innehåll |
 |---|---|
-| `index.html` | Hero, intro, två foton (klick ger helskärm), färgval, storleksval, adressformulär, lagertext, villkor med integritetsrad, Skicka |
+| `index.html` | Hero, sluttext (dold tills det är slut), intro, två foton (klick ger helskärm), färgval, storleksval, adressformulär, lagertext, villkor med integritetsrad, Skicka |
 | `slut.html` | Visas när de 100 t-shirtarna är slut: samma hero, bara text |
 | `styles.css` | All styling. Färger, marginal och typsnitt som CSS-variabler i `:root` |
-| `script.js` | Koll om det är slut, validering, inskick till databasen, mejl via FormSubmit, lightbox |
+| `db.js` | Databasens adress och publika nyckel, frågan om det är slut |
+| `script.js` | Visar formulär eller sluttext, validering, inskick till databasen, mejl via FormSubmit, lightbox |
 | `.github/workflows/ping-databas.yml` | Daglig ping som håller databasen vaken |
 | `fonts/` | ATG Rubrik + ATG Text som woff2 (konverterade från kundens otf) |
 | `img/hero.jpg`, `img/hero@2x.jpg` | Jockeyn, 1000 och 2000 px. 2x ur originalet `woman screen right_FULL.png` |

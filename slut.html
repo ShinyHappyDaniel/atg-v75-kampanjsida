@@ -13,7 +13,9 @@
   <link rel="preload" href="fonts/ATGRubrik.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-ExtraBoldItalic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="preconnect" href="https://nkfxqteujqatmzwbnxrn.supabase.co" crossorigin>
+  <script src="db.js?v=1"></script>
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
   <div class="page">
@@ -28,5 +30,10 @@
       <p class="intro__text intro__text--wrap">Hoppas du har bättre flyt på V75 i morgon. Lycka till!</p>
     </main>
   </div>
+
+  <script>
+    // Har platser öppnats igen (t.ex. efter ett test eller ett raderat inskick)? Tillbaka till formuläret.
+    DB_STATUS.then(function (s) { if (s && s.slut === false) location.replace('./'); });
+  </script>
 </body>
 </html>

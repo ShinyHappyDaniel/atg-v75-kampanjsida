@@ -1,6 +1,8 @@
 // Inskicken sparas i en Supabase-databas som räknar dem och släpper in de 100 första.
+// Databasadress, nyckel och frågan "är det slut?" ligger i db.js, som laddas i <head>.
 // Varje godkänt inskick blir också ett mejl till Lasse via FormSubmit (rubrik "ATG - T-shirt").
-// När de 100 är slut skickas besökaren till slut.html, både vid sidladdning och vid inskick.
+// När de 100 är slut visas slutsidans text direkt på samma sida och adressen blir slut.html,
+// både vid sidladdning och vid inskick. Formuläret syns aldrig när det är slut.
 // Längst ner: helskärmsvisning (lightbox) av t-shirtbilderna.
 //
 // Mejlmottagaren byggs ihop här så adressen inte ligger i klartext för spambottar.
@@ -9,16 +11,12 @@
 (function () {
   'use strict';
 
-  // Supabase: projektets adress och publika nyckel. Nyckeln får bara anropa
-  // tshirt_status() och anmal_tshirt(), aldrig läsa listan (se atg-databas.sql).
-  var DB_URL = 'https://nkfxqteujqatmzwbnxrn.supabase.co';
-  var DB_KEY = 'sb_publishable_BWeioTLKbRV83mLM8oy9-w_uUhJr5zX';
-
   var TO = ['lasse', 'shinyhappypeople.se'].join('@');
   var MAIL_ENDPOINT = 'https://formsubmit.co/ajax/' + TO;
   var SUBJECT = 'ATG - T-shirt';
 
   var SLUT_URL = 'slut.html';
+  var SLUT_TITLE = 'Alla t-shirts är slut | ATG';
   var STATUS_TIMEOUT = 3000;   // ms: svarar inte databasen visas formuläret ändå
 
   var MSG_OK = 'Tack! Din t-shirt är på väg.';
@@ -26,41 +24,35 @@
   var MSG_INVALID = 'Något i formuläret stämmer inte. Kontrollera uppgifterna och försök igen.';
   var MSG_FAIL = 'Något gick fel. Försök igen om en stund.';
 
+  var root = document.documentElement;
+  var startView = document.getElementById('start-innehall');
+  var soldOutView = document.getElementById('slut-innehall');
+
   initLightbox();
 
-  function rpc(fn, args) {
-    return fetch(DB_URL + '/rest/v1/rpc/' + fn, {
-      method: 'POST',
-      headers: { 'apikey': DB_KEY, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(args || {})
-    }).then(function (res) {
-      if (!res.ok) throw new Error('Databasen svarade ' + res.status);
-      return res.json();
-    });
-  }
-
-  function toSoldOut() {
-    window.location.replace(SLUT_URL);
-  }
-
-  // ---- Är t-shirtarna slut? Innehållet är dolt (klassen "kollar") tills svaret kommit. ----
-  var root = document.documentElement;
-  var revealed = false;
   function reveal() {
-    if (revealed) return;
-    revealed = true;
     root.classList.remove('kollar');
   }
+
+  // Slut: byt till slutsidans text på plats. Ingen ny sidladdning, formuläret döljs helt.
+  function showSoldOut() {
+    var box = document.getElementById('lightbox');
+    if (box && !box.hidden) document.getElementById('lightbox-close').click();
+    startView.hidden = true;
+    soldOutView.hidden = false;
+    document.title = SLUT_TITLE;
+    if (window.history && history.replaceState) history.replaceState(null, '', SLUT_URL);
+    reveal();
+    window.scrollTo(0, 0);
+  }
+
+  // ---- Är t-shirtarna slut? Frågan startade redan i db.js. Innehållet är dolt (klassen "kollar") tills svaret kommit. ----
   var timer = setTimeout(reveal, STATUS_TIMEOUT);
-  rpc('tshirt_status')
-    .then(function (s) {
-      if (s && s.slut === true) { clearTimeout(timer); toSoldOut(); return; }
-      reveal();
-    })
-    .catch(function (err) {
-      console.error('Kunde inte kolla antalet:', err);
-      reveal();
-    });
+  DB_STATUS.then(function (s) {
+    clearTimeout(timer);
+    if (s && s.slut === true) showSoldOut();
+    else reveal();
+  });
 
   // ---- Formulär ----
   var form = document.getElementById('tshirt-form');
@@ -159,7 +151,7 @@
     button.textContent = 'Skickar …';
     status.hidden = true;
 
-    rpc('anmal_tshirt', {
+    dbRpc('anmal_tshirt', {
       p_farg: d.farg, p_storlek: d.storlek, p_namn: d.namn, p_adress: d.adress,
       p_postnummer: d.postnummer, p_ort: d.ort, p_epost: d.epost
     })
@@ -171,7 +163,7 @@
           show(MSG_OK);
           sendMail(d, svar);
         } else if (s === 'slut') {
-          toSoldOut();
+          showSoldOut();
         } else if (s === 'dubblett') {
           unlock(MSG_DUP);
         } else if (s === 'ogiltig') {

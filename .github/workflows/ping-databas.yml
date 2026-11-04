@@ -1,7 +1,7 @@
 # Håller Supabase-databasen vaken: gratisplanen pausar projekt efter en vecka utan trafik.
 # Frågar databasen en gång per dygn hur många t-shirts som är kvar.
 # Misslyckas frågan mejlar GitHub den som senast ändrade filen, så den fungerar också som larm.
-# Adress och publik nyckel läses ur script.js, så de finns bara på ett ställe.
+# Adress och publik nyckel läses ur db.js, så de finns bara på ett ställe.
 # Efter kampanjen: Actions -> "Håll databasen vaken" -> ... -> Disable workflow.
 name: Håll databasen vaken
 
@@ -23,10 +23,10 @@ jobs:
       - name: Fråga databasen hur många t-shirts som är kvar
         run: |
           set -euo pipefail
-          URL=$(sed -n "s/.*var DB_URL = '\([^']*\)'.*/\1/p" script.js)
-          KEY=$(sed -n "s/.*var DB_KEY = '\([^']*\)'.*/\1/p" script.js)
+          URL=$(sed -n "s/.*var DB_URL = '\([^']*\)'.*/\1/p" db.js)
+          KEY=$(sed -n "s/.*var DB_KEY = '\([^']*\)'.*/\1/p" db.js)
           if [ -z "$URL" ] || [ -z "$KEY" ] || echo "$URL$KEY" | grep -q "SUPABASE_"; then
-            echo "::error::DB_URL eller DB_KEY saknas i script.js"
+            echo "::error::DB_URL eller DB_KEY saknas i db.js"
             exit 1
           fi
           SVAR=$(curl --fail-with-body -sS --retry 3 --retry-delay 20 --max-time 30 \
