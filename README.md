@@ -1,19 +1,30 @@
 # ATG V75: kampanjsida (t-shirt)
 
-Statisk mobilsida för ATG:s V75-guerilla. Den som plockat en vinnare väljer färg, storlek och adress och får en t-shirt hemskickad. De 100 första vinner, sedan visas `slut.html`. Design från Claude Design (senast `atg-v75-kampanjsida-nyny.zip`, 26-11-03), byggd av Shiny Happy People.
+Statisk mobilsida för ATG:s V75-guerilla. Den som plockat en vinnare väljer färg, storlek och adress och får en t-shirt hemskickad. De 100 första vinner (räknas i en Supabase-databas), sedan visas `slut.html` automatiskt. Design från Claude Design (senast `atg-v75-kampanjsida-nyny.zip`, 26-11-03), byggd av Shiny Happy People.
 
 Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 
-## Formuläret
+## Databasen (Supabase)
 
-- Skickas via [FormSubmit](https://formsubmit.co) som mejl till Lasse, rubrik **ATG - T-shirt**, tabellmall.
+- Projekt `atg-v75` (ref `nkfxqteujqatmzwbnxrn`, Stockholm) i organisationen Shiny Happy People. SQL:en som bygger den ligger hos SHP (`atg-databas-26-11-04.sql` i projektmappen) och kan köras om.
+- Sidan anropar bara två funktioner med den publika nyckeln i `script.js`:
+  - `tshirt_status()` när sidan laddas. Är det slut skickas besökaren till `slut.html`. Innehållet är dolt tills svaret kommit, högst 3 sekunder.
+  - `anmal_tshirt(...)` vid Skicka. Svarar `ok`, `slut`, `dubblett` eller `ogiltig`.
+- Databasen släpper in exakt `max_antal` inskick (tabellen `kampanj`), även när många skickar samtidigt. En t-shirt per e-postadress.
+- Den publika nyckeln kan inte läsa listan eller ändra gränsen. Listan läses i Supabase-panelen: Table Editor, `anmalningar`, Export to CSV.
+- Antalet räknas ur raderna. Raderas ett fejkat inskick öppnas platsen igen.
+- **Ändra gränsen:** `update public.kampanj set max_antal = 100;` i SQL Editor.
+- **Efter kampanjen:** sätt `max_antal` till 0 först, töm sedan listan (`truncate table public.anmalningar;`). I omvänd ordning öppnas sidan igen.
+- **Håll vaken:** `.github/workflows/ping-databas.yml` frågar databasen varje dag så att gratisplanen inte pausar projektet. Misslyckas den mejlar GitHub. Stäng av den under Actions efter kampanjen.
+
+## Mejlet till Lasse (FormSubmit)
+
+- Varje godkänt inskick blir också ett mejl via [FormSubmit](https://formsubmit.co), rubrik **ATG - T-shirt**, tabellmall, med raden "Nummer 38 av 100" överst. Mejlet är en avisering: går det inte fram är inskicket ändå sparat.
 - Svara på mejlet så går svaret till deltagarens e-post (`_replyto`).
-- Mejlet innehåller Färg (Peach/Offwhite), Storlek (XS till XL), Namn, Adress, Postnummer, Ort och E-post.
-- Spamfälla (`_honey`) i ett dolt fält.
-- Postnummer kräver fem siffror (`123 45` eller `12345`), mejlet får alltid formatet `123 45`.
-- **Aktivering:** första inskicket från en ny adress skickar ett aktiveringsmejl från FormSubmit till mottagaren. Inget levereras förrän någon klickat på knappen i det mejlet.
+- Spamfälla (`_honey`) i ett dolt fält: ifylld fälla sparar inget.
+- Postnummer kräver fem siffror (`123 45` eller `12345`), sparas och mejlas alltid som `123 45`.
+- **Aktivering:** första inskicket från en ny adress skickar ett aktiveringsmejl från FormSubmit till mottagaren. Inga mejl levereras förrän någon klickat på knappen i det mejlet.
 - **Dölj adressen:** efter aktivering skickar FormSubmit en slumpsträng (alias). Byt `TO` i `script.js` mot den så syns mejladressen inte i källkoden.
-- **De 100 första:** FormSubmit räknar inte inskick. Lasse håller koll på antalet mejl. Vid 100: ta bort kommentaren runt `meta http-equiv="refresh"` överst i `index.html` och pusha, så skickas alla vidare till `slut.html`.
 - **Flytt till ny domän:** testa ett inskick direkt efter flytten. Kräver FormSubmit ny aktivering kommer mejlet igen.
 
 ## Filer
@@ -23,7 +34,8 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 | `index.html` | Hero, intro, två foton (klick ger helskärm), färgval, storleksval, adressformulär, lagertext, villkor med integritetsrad, Skicka |
 | `slut.html` | Visas när de 100 t-shirtarna är slut: samma hero, bara text |
 | `styles.css` | All styling. Färger, marginal och typsnitt som CSS-variabler i `:root` |
-| `script.js` | Validering, inskick till FormSubmit och lightbox för fotona |
+| `script.js` | Koll om det är slut, validering, inskick till databasen, mejl via FormSubmit, lightbox |
+| `.github/workflows/ping-databas.yml` | Daglig ping som håller databasen vaken |
 | `fonts/` | ATG Rubrik + ATG Text som woff2 (konverterade från kundens otf) |
 | `img/hero.jpg`, `img/hero@2x.jpg` | Jockeyn, 1000 och 2000 px. 2x ur originalet `woman screen right_FULL.png` |
 | `img/tshirt-peach.jpg`, `img/tshirt-offwhite.jpg` | Modellbilder, 746 px (originalen är inte större) |

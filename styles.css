@@ -125,6 +125,9 @@ body {
 
 .content--soldout { padding: calc(40 * var(--u)) var(--gutter) calc(48 * var(--u)); }
 
+/* Medan sidan frågar databasen om t-shirtarna är slut: dölj innehållet, behåll hero och layout */
+.kollar .content { visibility: hidden; }
+
 .intro { display: flex; flex-direction: column; gap: calc(14 * var(--u)); }
 
 .intro__title {

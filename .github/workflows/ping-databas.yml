@@ -1,0 +1,38 @@
+# Håller Supabase-databasen vaken: gratisplanen pausar projekt efter en vecka utan trafik.
+# Frågar databasen en gång per dygn hur många t-shirts som är kvar.
+# Misslyckas frågan mejlar GitHub den som senast ändrade filen, så den fungerar också som larm.
+# Adress och publik nyckel läses ur script.js, så de finns bara på ett ställe.
+# Efter kampanjen: Actions -> "Håll databasen vaken" -> ... -> Disable workflow.
+name: Håll databasen vaken
+
+on:
+  schedule:
+    - cron: "17 6 * * *"   # varje dag 06:17 UTC
+  workflow_dispatch:         # kör för hand under Actions
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fråga databasen hur många t-shirts som är kvar
+        run: |
+          set -euo pipefail
+          URL=$(sed -n "s/.*var DB_URL = '\([^']*\)'.*/\1/p" script.js)
+          KEY=$(sed -n "s/.*var DB_KEY = '\([^']*\)'.*/\1/p" script.js)
+          if [ -z "$URL" ] || [ -z "$KEY" ] || echo "$URL$KEY" | grep -q "SUPABASE_"; then
+            echo "::error::DB_URL eller DB_KEY saknas i script.js"
+            exit 1
+          fi
+          SVAR=$(curl --fail-with-body -sS --retry 3 --retry-delay 20 --max-time 30 \
+            -X POST "$URL/rest/v1/rpc/tshirt_status" \
+            -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}') \
+            || { echo "::error::Databasen svarade inte: ${SVAR:-}"; exit 1; }
+          echo "Databasen svarade: $SVAR"
+          echo "$SVAR" | grep -q '"kvar"' || { echo "::error::Oväntat svar från databasen"; exit 1; }
+          echo "Databasen är vaken. Svar: \`$SVAR\`" >> "$GITHUB_STEP_SUMMARY"

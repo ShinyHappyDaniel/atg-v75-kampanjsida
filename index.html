@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- När de 100 t-shirtarna är slut: ta bort kommentaren runt raden nedan, så skickas alla till slut.html. -->
-  <!-- <meta http-equiv="refresh" content="0; url=slut.html"> -->
+  <!-- Döljer innehållet tills databasen svarat om t-shirtarna är slut (script.js tar bort klassen). -->
+  <script>document.documentElement.classList.add('kollar');</script>
   <title>V75 är tillbaka. Hämta din t-shirt | ATG</title>
   <meta name="description" content="Snyggt! Du plockade en av vinnarna och belönas därför med en t-shirt.">
   <meta name="robots" content="noindex, nofollow">
@@ -25,7 +25,8 @@
   <link rel="preload" href="fonts/ATGRubrik.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-ExtraBoldItalic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="preconnect" href="https://nkfxqteujqatmzwbnxrn.supabase.co" crossorigin>
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <div class="page" id="page">
@@ -128,6 +129,6 @@
     </button>
   </div>
 
-  <script src="script.js?v=2"></script>
+  <script src="script.js?v=3"></script>
 </body>
 </html>
