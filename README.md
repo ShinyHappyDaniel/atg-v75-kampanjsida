@@ -18,11 +18,18 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 - **Efter kampanjen:** sätt `max_antal` till 0 först, töm sedan listan (`truncate table public.anmalningar;`). I omvänd ordning öppnas sidan igen.
 - **Håll vaken:** `.github/workflows/ping-databas.yml` frågar databasen varje dag så att gratisplanen inte pausar projektet. Misslyckas den mejlar GitHub. Stäng av den under Actions efter kampanjen.
 
+## Efter Skicka
+
+- **Allt som stoppar ett inskick visas som en popup i mitten** med en OK-knapp: färg eller storlek saknas, tomt fält, fel postnummer, fel e-postadress (samma kontroll som databasen: `namn@domän.se`), e-post som redan använts, nätverksfel. OK tar besökaren till fältet som ska rättas, som också markeras tills det ändras. Texterna står i `MSG` i `script.js`.
+- **Godkänd beställning:** besökaren skickas till `tack.html` ("Tack! Din t-shirt är på väg.") med en sammanfattning av färg, storlek och adress. Sammanfattningen ligger bara i flikens `sessionStorage`, aldrig i adressfältet. Bakåtknappen leder inte tillbaka till det ifyllda formuläret.
+- **Spärr per telefon:** efter en beställning minns webbläsaren det (`localStorage`, bara en flagga). Öppnas sidan igen hamnar man direkt på tacksidan. Kringgås med annan webbläsare eller privat läge, databasens spärr per e-post gäller ändå.
+- **Testa igen på samma telefon:** öppna `index.html?ny` (eller sajtens adress + `?ny`). Det nollställer spärren i den webbläsaren.
+
 ## Mejlet till Lasse (FormSubmit)
 
-- Varje godkänt inskick blir också ett mejl via [FormSubmit](https://formsubmit.co), rubrik **ATG - T-shirt**, tabellmall, med raden "Nummer 38 av 100" överst. Mejlet är en avisering: går det inte fram är inskicket ändå sparat.
+- Varje godkänt inskick blir också ett mejl via [FormSubmit](https://formsubmit.co), rubrik **ATG - T-shirt**, tabellmall, med raden "Nummer 38 av 100" överst. Sidan väntar högst 5 sekunder på mejlet innan tacksidan visas. Mejlet är en avisering: går det inte fram är inskicket ändå sparat.
 - Svara på mejlet så går svaret till deltagarens e-post (`_replyto`).
-- Spamfälla (`_honey`) i ett dolt fält: ifylld fälla sparar inget.
+- Spamfälla (`_honey`) i ett dolt fält: ifylld fälla sparar inget men visar tacksidan.
 - Postnummer kräver fem siffror (`123 45` eller `12345`), sparas och mejlas alltid som `123 45`.
 - **Aktivering:** första inskicket från en ny adress skickar ett aktiveringsmejl från FormSubmit till mottagaren. Inga mejl levereras förrän någon klickat på knappen i det mejlet.
 - **Dölj adressen:** efter aktivering skickar FormSubmit en slumpsträng (alias). Byt `TO` i `script.js` mot den så syns mejladressen inte i källkoden.
@@ -32,11 +39,12 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 
 | Fil | Innehåll |
 |---|---|
-| `index.html` | Hero, sluttext (dold tills det är slut), intro, två foton (klick ger helskärm), färgval, storleksval, adressformulär, lagertext, villkor med integritetsrad, Skicka |
+| `index.html` | Spärr för telefoner som redan beställt, hero, sluttext (dold tills det är slut), intro, två foton (klick ger helskärm), färgval, storleksval, adressformulär, lagertext, villkor med integritetsrad, Skicka |
 | `slut.html` | Visas när de 100 t-shirtarna är slut: samma hero, bara text |
+| `tack.html` | Visas efter en godkänd beställning: tacktext och sammanfattning |
 | `styles.css` | All styling. Färger, marginal och typsnitt som CSS-variabler i `:root` |
 | `db.js` | Databasens adress och publika nyckel, frågan om det är slut |
-| `script.js` | Visar formulär eller sluttext, validering, inskick till databasen, mejl via FormSubmit, lightbox |
+| `script.js` | Visar formulär eller sluttext, validering med popup, inskick till databasen, mejl via FormSubmit, vidare till tacksidan, lightbox |
 | `.github/workflows/ping-databas.yml` | Daglig ping som håller databasen vaken |
 | `fonts/` | ATG Rubrik + ATG Text som woff2 (konverterade från kundens otf) |
 | `img/hero.jpg`, `img/hero@2x.jpg` | Jockeyn, 1000 och 2000 px. 2x ur originalet `woman screen right_FULL.png` |

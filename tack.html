@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tack för din beställning | ATG</title>
+  <meta name="description" content="Tack! Din t-shirt är på väg.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#3A3630">
+
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="preload" href="fonts/ATGRubrik.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ATGText-ExtraBoldItalic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ATGText-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css?v=7">
+</head>
+<body>
+  <div class="page">
+
+    <header class="hero">
+      <img class="hero__logo" src="img/atg-logo.png" width="54" height="22" alt="ATG">
+      <h1 class="hero__title">V75 är tillbaka.<br>Med ny energi.</h1>
+    </header>
+
+    <main class="content content--soldout">
+      <h2 class="intro__title intro__title--wrap">Tack! Din t-shirt är på väg.</h2>
+      <p class="intro__text intro__text--wrap">Håll utkik i brevlådan. Och lycka till på V75!</p>
+
+      <div class="receipt" id="kvitto" hidden>
+        <p class="receipt__label">Din beställning</p>
+        <p class="receipt__text"><span class="receipt__item" id="kvitto-plagg"></span><br><span id="kvitto-namn"></span><br><span id="kvitto-adress"></span><br><span id="kvitto-ort"></span></p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Sammanfattningen sparades i fliken när beställningen gick igenom (script.js).
+    // Saknas den, t.ex. vid ett senare besök, visas bara tacktexten.
+    (function () {
+      var k = null;
+      try { k = JSON.parse(sessionStorage.getItem('atg-v75-kvitto')); } catch (e) {}
+      if (!k || !k.farg || !k.storlek) return;
+      document.getElementById('kvitto-plagg').textContent = k.farg + ', storlek ' + k.storlek;
+      document.getElementById('kvitto-namn').textContent = k.namn || '';
+      document.getElementById('kvitto-adress').textContent = k.adress || '';
+      document.getElementById('kvitto-ort').textContent = ((k.postnummer || '') + ' ' + (k.ort || '')).trim();
+      document.getElementById('kvitto').hidden = false;
+    })();
+  </script>
+</body>
+</html>

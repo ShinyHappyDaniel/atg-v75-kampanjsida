@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Frågar databasen direkt om t-shirtarna är slut och döljer innehållet tills svaret kommit.
        Är det slut visar script.js slutsidans text här direkt, utan att formuläret syns. -->
-  <script>document.documentElement.classList.add('kollar');</script>
+  <script>
+    // Har den här telefonen redan beställt? Då direkt till tacksidan. ?ny nollställer (för test).
+    try {
+      if (/[?&]ny\b/.test(location.search)) localStorage.removeItem('atg-v75-bestallt');
+      else if (localStorage.getItem('atg-v75-bestallt')) location.replace('tack.html');
+    } catch (e) {}
+    document.documentElement.classList.add('kollar');
+  </script>
   <link rel="preconnect" href="https://nkfxqteujqatmzwbnxrn.supabase.co" crossorigin>
   <script src="db.js?v=1"></script>
   <title>V75 är tillbaka. Hämta din t-shirt | ATG</title>
@@ -28,7 +35,7 @@
   <link rel="preload" href="fonts/ATGRubrik.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-ExtraBoldItalic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/ATGText-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <div class="page" id="page">
@@ -122,11 +129,16 @@
 
         <button class="submit" type="submit">Skicka</button>
 
-        <p class="status" id="form-status" role="status" aria-live="polite" hidden></p>
-
       </form>
     </main>
   </div>
+
+  <!-- Popup i mitten för meddelanden vid Skicka -->
+  <dialog class="notice" id="notice" aria-labelledby="notice-title" aria-describedby="notice-text">
+    <h2 class="notice__title" id="notice-title"></h2>
+    <p class="notice__text" id="notice-text"></p>
+    <button type="button" class="submit" id="notice-ok">OK</button>
+  </dialog>
 
   <!-- Helskärmsvisning av bild -->
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Förstorad bild" hidden>
@@ -137,6 +149,6 @@
     </button>
   </div>
 
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>

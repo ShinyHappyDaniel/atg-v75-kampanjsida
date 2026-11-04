@@ -26,6 +26,7 @@
   --offwhite: #F3EBD6;
   --swatch-edge: rgba(26, 26, 26, 0.35);
   --lightbox-bg: rgba(10, 8, 6, 0.94);
+  --notice-backdrop: rgba(10, 8, 6, 0.6);
 
   --column: 560px;                                                   /* kolumnens maxbredd */
   --u: clamp(1px, calc(100vw / 390), calc(var(--column) / 390));     /* 1 designpixel */
@@ -366,13 +367,57 @@ body {
 .submit:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .submit:disabled { cursor: default; }
 
-.status {
-  margin: 0;
-  font-weight: 700;
-  font-size: calc(15 * var(--u));
-  line-height: 1.4;
-  text-align: center;
+/* Fält eller val som ska rättas (markeras när popupen visas, försvinner vid ändring) */
+.field.fel { box-shadow: 0 0 0 2px var(--ink); }
+.choice.fel .chip__face { box-shadow: inset 0 0 0 calc(1 * var(--u)) var(--ink); }
+
+/* Popup i mitten för meddelanden vid Skicka */
+.notice {
+  width: min(calc(326 * var(--u)), calc(100vw - 32px));
+  max-width: none;
+  padding: calc(24 * var(--u));
+  border: 0;
+  border-radius: calc(4 * var(--u));
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
 }
+.notice::backdrop { background: var(--notice-backdrop); }
+.notice[open] { animation: notice-in 0.18s ease-out; }
+@keyframes notice-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+@media (prefers-reduced-motion: reduce) { .notice[open] { animation: none; } }
+
+.notice__title {
+  margin: 0 0 calc(10 * var(--u));
+  font-weight: 800;
+  font-style: italic;
+  font-size: calc(20 * var(--u));
+  line-height: 1.25;
+}
+.notice__text {
+  margin: 0 0 calc(22 * var(--u));
+  font-size: calc(16 * var(--u));
+  line-height: 1.4;
+}
+
+/* Tacksidans sammanfattning */
+.receipt {
+  padding: calc(14 * var(--u)) calc(16 * var(--u)) calc(16 * var(--u));
+  background: var(--white);
+}
+.receipt__label {
+  margin: 0 0 calc(8 * var(--u));
+  font-size: calc(11 * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.receipt__text {
+  margin: 0;
+  font-size: calc(16 * var(--u));
+  line-height: 1.45;
+}
+.receipt__item { font-weight: 700; }
 
 .nobr { white-space: nowrap; }   /* bryt aldrig "t-shirten" vid bindestrecket */
 

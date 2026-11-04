@@ -1,8 +1,11 @@
 // Inskicken sparas i en Supabase-databas som räknar dem och släpper in de 100 första.
 // Databasadress, nyckel och frågan "är det slut?" ligger i db.js, som laddas i <head>.
 // Varje godkänt inskick blir också ett mejl till Lasse via FormSubmit (rubrik "ATG - T-shirt").
-// När de 100 är slut visas slutsidans text direkt på samma sida och adressen blir slut.html,
-// både vid sidladdning och vid inskick. Formuläret syns aldrig när det är slut.
+//
+// Efter en godkänd beställning skickas man till tack.html (med en sammanfattning), och
+// telefonen minns det: öppnas sidan igen hamnar man direkt på tacksidan (se <head> i index.html).
+// När de 100 är slut visas slutsidans text direkt på samma sida och adressen blir slut.html.
+// Allt som stoppar ett inskick visas som en popup i mitten av skärmen.
 // Längst ner: helskärmsvisning (lightbox) av t-shirtbilderna.
 //
 // Mejlmottagaren byggs ihop här så adressen inte ligger i klartext för spambottar.
@@ -14,21 +17,42 @@
   var TO = ['lasse', 'shinyhappypeople.se'].join('@');
   var MAIL_ENDPOINT = 'https://formsubmit.co/ajax/' + TO;
   var SUBJECT = 'ATG - T-shirt';
+  var MAIL_WAIT = 5000;        // ms: så länge väntar vi på mejlet innan tacksidan visas
 
   var SLUT_URL = 'slut.html';
   var SLUT_TITLE = 'Alla t-shirts är slut | ATG';
+  var TACK_URL = 'tack.html';
   var STATUS_TIMEOUT = 3000;   // ms: svarar inte databasen visas formuläret ändå
 
-  var MSG_OK = 'Tack! Din t-shirt är på väg.';
-  var MSG_DUP = 'Den här e-postadressen har redan en t-shirt på väg. Endast en t-shirt per tävlande.';
-  var MSG_INVALID = 'Något i formuläret stämmer inte. Kontrollera uppgifterna och försök igen.';
-  var MSG_FAIL = 'Något gick fel. Försök igen om en stund.';
+  // Nycklar i webbläsarens lagring. Beställd = bara en flagga, inga personuppgifter.
+  var KEY_ORDERED = 'atg-v75-bestallt';    // localStorage: telefonen har beställt
+  var KEY_RECEIPT = 'atg-v75-kvitto';      // sessionStorage: sammanfattningen till tacksidan
+
+  // Meddelanden i popupen: [rubrik, text]
+  var MSG = {
+    farg: ['Välj färg', 'Välj om du vill ha t-shirten i Peach eller Offwhite.'],
+    storlek: ['Välj storlek', 'Välj en storlek mellan XS och XL.'],
+    namn: ['Fyll i ditt namn', 'Skriv ditt för- och efternamn, så vet vi vem t-shirten ska till.'],
+    adress: ['Fyll i adressen', 'Skriv gatuadressen dit t-shirten ska skickas.'],
+    postnummer: ['Fyll i postnumret', 'Postnumret är fem siffror, till exempel 123 45.'],
+    postnummerFel: ['Kolla postnumret', 'Postnumret ska vara fem siffror, till exempel 123 45.'],
+    ort: ['Fyll i orten', 'Skriv vilken ort adressen ligger i.'],
+    epost: ['Fyll i e-postadressen', 'Skriv din e-postadress, till exempel namn@exempel.se.'],
+    epostFel: ['Kolla e-postadressen', 'Adressen ser inte ut att stämma. Den ska se ut ungefär som namn@exempel.se.'],
+    dubblett: ['Den här e-postadressen är redan med', 'Den har redan en t-shirt på väg. Endast en t-shirt per tävlande.'],
+    ogiltig: ['Något stämmer inte', 'Kontrollera uppgifterna i formuläret och försök igen.'],
+    fel: ['Något gick fel', 'Det gick inte att skicka just nu. Försök igen om en stund.']
+  };
+  // Samma kontroll som databasen gör: något@något.något
+  var EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  var PNR_RE = /^[0-9]{3} ?[0-9]{2}$/;
 
   var root = document.documentElement;
   var startView = document.getElementById('start-innehall');
   var soldOutView = document.getElementById('slut-innehall');
 
   initLightbox();
+  var notice = initNotice();
 
   function reveal() {
     root.classList.remove('kollar');
@@ -38,6 +62,7 @@
   function showSoldOut() {
     var box = document.getElementById('lightbox');
     if (box && !box.hidden) document.getElementById('lightbox-close').click();
+    notice.close();
     startView.hidden = true;
     soldOutView.hidden = false;
     document.title = SLUT_TITLE;
@@ -57,14 +82,8 @@
   // ---- Formulär ----
   var form = document.getElementById('tshirt-form');
   if (!form) return;
-  var status = document.getElementById('form-status');
   var button = form.querySelector('.submit');
   var label = button.textContent;
-
-  function show(msg) {
-    status.textContent = msg;
-    status.hidden = false;
-  }
 
   function value(name) {
     return form.elements[name].value.trim();
@@ -82,17 +101,60 @@
     return input ? input.parentNode.textContent.trim() : '';
   }
 
+  // Första felet uppifrån: [fältnamn, meddelande], eller null om allt är ifyllt rätt.
+  function firstError() {
+    if (!choice('farg')) return ['farg', MSG.farg];
+    if (!choice('storlek')) return ['storlek', MSG.storlek];
+    if (!value('namn')) return ['namn', MSG.namn];
+    if (!value('adress')) return ['adress', MSG.adress];
+    if (!value('postnummer')) return ['postnummer', MSG.postnummer];
+    if (!PNR_RE.test(value('postnummer'))) return ['postnummer', MSG.postnummerFel];
+    if (!value('ort')) return ['ort', MSG.ort];
+    if (!value('epost')) return ['epost', MSG.epost];
+    if (!EMAIL_RE.test(value('epost'))) return ['epost', MSG.epostFel];
+    return null;
+  }
+
+  // Markera fältet eller valet som ska rättas. Markeringen försvinner när man ändrar det.
+  function markField(name) {
+    var el = form.elements[name];
+    var first = el.length ? el[0] : el;
+    var box = first.closest('.field, .choice');
+    if (box) box.classList.add('fel');
+    return first;
+  }
+  form.addEventListener('input', clearMark);
+  form.addEventListener('change', clearMark);
+  function clearMark(e) {
+    var box = e.target.closest && e.target.closest('.field, .choice');
+    if (box) box.classList.remove('fel');
+  }
+
+  // Visa popupen. Efter OK hamnar man i fältet som ska rättas.
+  function stop(name, msg) {
+    var target = name ? markField(name) : null;
+    notice.open(msg[0], msg[1], target);
+  }
+
   function lockForm() {
     Array.prototype.forEach.call(form.elements, function (el) { el.disabled = true; });
   }
 
-  function unlock(msg) {
+  function unlock() {
     button.disabled = false;
     button.textContent = label;
-    show(msg);
+  }
+
+  function store(storage, key, val) {
+    try { window[storage].setItem(key, val); } catch (e) { /* privat läge: tacksidan visas ändå */ }
+  }
+
+  function goToThanks() {
+    window.location.replace(TACK_URL);
   }
 
   // Mejlet till Lasse är en avisering. Inskicket är redan sparat, så ett fel här stoppar inget.
+  // Svarar det inte inom MAIL_WAIT går vi vidare ändå.
   function sendMail(d, svar) {
     var payload = {
       _subject: SUBJECT,
@@ -108,7 +170,7 @@
       'Ort': d.ort,
       'E-post': d.epost
     };
-    fetch(MAIL_ENDPOINT, {
+    var mail = fetch(MAIL_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(payload)
@@ -120,6 +182,8 @@
         }
       })
       .catch(function (err) { console.error('Mejlet till Lasse kunde inte skickas:', err); });
+    var wait = new Promise(function (resolve) { setTimeout(resolve, MAIL_WAIT); });
+    return Promise.race([mail, wait]);
   }
 
   form.addEventListener('submit', function (e) {
@@ -128,12 +192,13 @@
     // Spamfällan är ifylld: låtsas att allt gick bra och spara inget.
     if (value('_honey')) {
       lockForm();
-      show(MSG_OK);
+      goToThanks();
       return;
     }
 
-    if (!form.checkValidity()) {
-      form.reportValidity();
+    var err = firstError();
+    if (err) {
+      stop(err[0], err[1]);
       return;
     }
 
@@ -149,7 +214,6 @@
 
     button.disabled = true;
     button.textContent = 'Skickar …';
-    status.hidden = true;
 
     dbRpc('anmal_tshirt', {
       p_farg: d.farg, p_storlek: d.storlek, p_namn: d.namn, p_adress: d.adress,
@@ -159,24 +223,66 @@
         var s = svar && svar.status;
         if (s === 'ok') {
           lockForm();
-          button.textContent = 'Skickat';
-          show(MSG_OK);
-          sendMail(d, svar);
-        } else if (s === 'slut') {
-          showSoldOut();
-        } else if (s === 'dubblett') {
-          unlock(MSG_DUP);
-        } else if (s === 'ogiltig') {
-          unlock(MSG_INVALID);
-        } else {
-          throw new Error('Okänt svar från databasen');
+          store('localStorage', KEY_ORDERED, String(Date.now()));
+          store('sessionStorage', KEY_RECEIPT, JSON.stringify({
+            farg: d.farg, storlek: d.storlek, namn: d.namn,
+            adress: d.adress, postnummer: d.postnummer, ort: d.ort
+          }));
+          return sendMail(d, svar).then(goToThanks);
         }
+        if (s === 'slut') return showSoldOut();
+        unlock();
+        if (s === 'dubblett') return stop('epost', MSG.dubblett);
+        if (s === 'ogiltig') return stop(null, MSG.ogiltig);
+        throw new Error('Okänt svar från databasen');
       })
       .catch(function (err) {
         console.error('Formuläret kunde inte skickas:', err);
-        unlock(MSG_FAIL);
+        unlock();
+        stop(null, MSG.fel);
       });
   });
+
+  // ---- Popup i mitten (dialog). Stängs med OK, Esc eller klick utanför. ----
+  function initNotice() {
+    var dlg = document.getElementById('notice');
+    var title = document.getElementById('notice-title');
+    var text = document.getElementById('notice-text');
+    var ok = document.getElementById('notice-ok');
+    var target = null;
+
+    function focusTarget() {
+      if (!target) return;
+      var box = target.closest('.field, .choice') || target;
+      box.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      target.focus({ preventScroll: true });
+      target = null;
+    }
+
+    dlg.addEventListener('close', focusTarget);
+    ok.addEventListener('click', function () { dlg.close(); });
+    dlg.addEventListener('click', function (e) {
+      if (e.target !== dlg) return;
+      var r = dlg.getBoundingClientRect();
+      var inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!inside) dlg.close();
+    });
+
+    return {
+      open: function (t, msg, field) {
+        title.textContent = t;
+        text.textContent = msg;
+        target = field || null;
+        if (dlg.open) dlg.close();
+        dlg.showModal();
+        ok.focus();
+      },
+      close: function () {
+        target = null;
+        if (dlg.open) dlg.close();
+      }
+    };
+  }
 
   // ---- Lightbox: klick på en bild visar den i helskärm. Stängs med krysset, Esc eller klick utanför. ----
   function initLightbox() {
