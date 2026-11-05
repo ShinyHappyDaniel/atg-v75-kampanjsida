@@ -1,23 +1,14 @@
 // Inskicken sparas i en Supabase-databas som räknar dem och släpper in de 100 första.
 // Databasadress, nyckel och frågan "är det slut?" ligger i db.js, som laddas i <head>.
-// Varje godkänt inskick blir också ett mejl till Lasse via FormSubmit (rubrik "ATG - T-shirt").
+// Inga mejl skickas. Listan över beställningar finns i databasen (tabellen anmalningar).
 //
 // Efter en godkänd beställning skickas man till tack.html (med en sammanfattning), och
 // telefonen minns det: öppnas sidan igen hamnar man direkt på tacksidan (se <head> i index.html).
 // När de 100 är slut visas slutsidans text direkt på samma sida och adressen blir slut.html.
 // Allt som stoppar ett inskick visas som en popup i mitten av skärmen.
 // Längst ner: helskärmsvisning (lightbox) av t-shirtbilderna.
-//
-// Mejlmottagaren byggs ihop här så adressen inte ligger i klartext för spambottar.
-// När FormSubmit-formuläret är aktiverat: byt TO mot slumpsträngen (alias) som
-// FormSubmit skickar i aktiveringsmejlet, så syns adressen inte alls i källkoden.
 (function () {
   'use strict';
-
-  var TO = ['lasse', 'shinyhappypeople.se'].join('@');
-  var MAIL_ENDPOINT = 'https://formsubmit.co/ajax/' + TO;
-  var SUBJECT = 'ATG - T-shirt';
-  var MAIL_WAIT = 5000;        // ms: så länge väntar vi på mejlet innan tacksidan visas
 
   var SLUT_URL = 'slut.html';
   var SLUT_TITLE = 'Alla t-shirts är slut | ATG';
@@ -89,7 +80,7 @@
     return form.elements[name].value.trim();
   }
 
-  // 12345 och 123 45 godtas, allt sparas och mejlas som 123 45.
+  // 12345 och 123 45 godtas, allt sparas som 123 45.
   function postnummer(raw) {
     var d = raw.replace(/\D/g, '');
     return d.length === 5 ? d.slice(0, 3) + ' ' + d.slice(3) : raw;
@@ -153,39 +144,6 @@
     window.location.replace(TACK_URL);
   }
 
-  // Mejlet till Lasse är en avisering. Inskicket är redan sparat, så ett fel här stoppar inget.
-  // Svarar det inte inom MAIL_WAIT går vi vidare ändå.
-  function sendMail(d, svar) {
-    var payload = {
-      _subject: SUBJECT,
-      _template: 'table',
-      _captcha: 'false',
-      _replyto: d.epost,
-      'Nummer': svar.nummer + ' av ' + svar.max,
-      'Färg': d.farg,
-      'Storlek': d.storlek,
-      'Namn': d.namn,
-      'Adress': d.adress,
-      'Postnummer': d.postnummer,
-      'Ort': d.ort,
-      'E-post': d.epost
-    };
-    var mail = fetch(MAIL_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
-        if (!data || String(data.success) !== 'true') {
-          throw new Error((data && data.message) || 'Okänt svar från FormSubmit');
-        }
-      })
-      .catch(function (err) { console.error('Mejlet till Lasse kunde inte skickas:', err); });
-    var wait = new Promise(function (resolve) { setTimeout(resolve, MAIL_WAIT); });
-    return Promise.race([mail, wait]);
-  }
-
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -228,7 +186,7 @@
             farg: d.farg, storlek: d.storlek, namn: d.namn,
             adress: d.adress, postnummer: d.postnummer, ort: d.ort
           }));
-          return sendMail(d, svar).then(goToThanks);
+          return goToThanks();
         }
         if (s === 'slut') return showSoldOut();
         unlock();
