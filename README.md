@@ -64,7 +64,10 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 
 ## Publicering
 
+- **Adress:** https://atg.shinyhappypeople.se/ (GitHub Pages med egen domän, från 26-11-09). Filen `CNAME` i roten talar om domänen för GitHub. Den gamla adressen `shinyhappydaniel.github.io/atg-v75-kampanjsida/` skickar vidare automatiskt.
+- **DNS:** CNAME-post `atg` → `shinyhappydaniel.github.io`, i Wix (shinyhappypeople.se:s DNS ligger hos Wix).
+- **Kort länk:** `shinyhappypeople.se/atg` är en 301-vidarebefordran i Wix-sajten (SEO, URL-omdirigeringar) till adressen ovan. Använd den i QR och tryck.
 - Sidan har `noindex`. Den nås via QR eller länk, inte via sök.
-- Byts adressen: uppdatera `og:url` och `og:image` i `index.html`.
+- Byts adressen: uppdatera `CNAME`, `og:url` och `og:image` i `index.html`, och vidarebefordringen i Wix.
 - Bumpa `?v=` på `styles.css` och `script.js` i `index.html` vid ändring, GitHub Pages cachar i 10 minuter.
 - Typsnitten är ATG:s licensierade filer.
