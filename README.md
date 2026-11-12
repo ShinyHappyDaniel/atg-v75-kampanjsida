@@ -11,11 +11,11 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
   - `tshirt_status()` innan sidan ritas. Är det slut visar `index.html` slutsidans text direkt på samma sida och adressen byts till `slut.html`. Formuläret ritas aldrig. Innehållet under heron är dolt tills svaret kommit, högst 3 sekunder.
   - `anmal_tshirt(...)` vid Skicka. Svarar `ok`, `slut`, `dubblett` eller `ogiltig`. Vid `slut` byts sidan till sluttexten på samma sätt.
 - `slut.html` frågar också: har platser öppnats igen (efter ett test eller ett raderat inskick) skickas besökaren tillbaka till formuläret.
-- Databasen släpper in exakt `max_antal` inskick (tabellen `kampanj`), även när många skickar samtidigt. En t-shirt per e-postadress.
+- Databasen släpper in exakt `max_antal` inskick (tabellen `atg_v75_kampanj`), även när många skickar samtidigt. En t-shirt per e-postadress.
 - Den publika nyckeln kan inte läsa listan eller ändra gränsen. Listan läses i Supabase-panelen, se nedan.
 - Antalet räknas ur raderna. Raderas ett fejkat inskick öppnas platsen igen.
-- **Ändra gränsen:** `update public.kampanj set max_antal = 100;` i SQL Editor.
-- **Efter kampanjen:** sätt `max_antal` till 0 först, töm sedan listan (`truncate table public.anmalningar;`). I omvänd ordning öppnas sidan igen.
+- **Ändra gränsen:** `update public.atg_v75_kampanj set max_antal = 100;` i SQL Editor.
+- **Efter kampanjen:** sätt `max_antal` till 0 först, töm sedan listan (`truncate table public.atg_v75_anmalningar;`). I omvänd ordning öppnas sidan igen.
 - **Håll vaken:** `.github/workflows/ping-databas.yml` frågar databasen varje dag så att gratisplanen inte pausar projektet. Misslyckas den mejlar GitHub. Stäng av den under Actions efter kampanjen.
 
 ## Efter Skicka
@@ -28,7 +28,7 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 ## Listan över beställningar
 
 - Inga mejl skickas (FormSubmit togs bort 26-11-05). Databasen är den enda listan.
-- Se den i Supabase-panelen: Table Editor, `anmalningar`. Export, CSV, ger en fil för utskicket.
+- Se den i Supabase-panelen: Table Editor, `atg_v75_anmalningar`. Export, CSV, ger en fil för utskicket.
 - Spamfälla (`_honey`) i ett dolt fält: ifylld fälla sparar inget men visar tacksidan.
 - Postnummer kräver fem siffror (`123 45` eller `12345`) och sparas alltid som `123 45`.
 

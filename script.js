@@ -1,6 +1,6 @@
 // Inskicken sparas i en Supabase-databas som räknar dem och släpper in de 100 första.
 // Databasadress, nyckel och frågan "är det slut?" ligger i db.js, som laddas i <head>.
-// Inga mejl skickas. Listan över beställningar finns i databasen (tabellen anmalningar).
+// Inga mejl skickas. Listan över beställningar finns i databasen (tabellen atg_v75_anmalningar).
 //
 // Efter en godkänd beställning skickas man till tack.html (med en sammanfattning), och
 // telefonen minns det: öppnas sidan igen hamnar man direkt på tacksidan (se <head> i index.html).
