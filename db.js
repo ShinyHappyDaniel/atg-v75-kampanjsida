@@ -21,3 +21,20 @@ var DB_STATUS = dbRpc('tshirt_status').catch(function (err) {
   console.error('Kunde inte kolla antalet:', err);
   return null;
 });
+
+// Besöksräknare utan cookies. Sparar bara tidpunkt, källa (utm_source eller värdnamnet
+// besökaren kom från) och mobil/dator. Ingen IP-adress, inga id:n, inget sparas i webbläsaren.
+(function () {
+  if (navigator.webdriver) return; // automatiska webbläsare räknas inte
+  var kalla = 'direkt';
+  try {
+    var utm = new URLSearchParams(location.search).get('utm_source');
+    if (utm) kalla = utm;
+    else if (document.referrer) {
+      var host = new URL(document.referrer).hostname;
+      if (host && host !== location.hostname) kalla = host;
+    }
+  } catch (e) {}
+  var enhet = window.matchMedia('(max-width: 720px)').matches ? 'mobil' : 'dator';
+  dbRpc('atg_v75_besok_logga', { p_kalla: kalla, p_enhet: enhet }).catch(function () {});
+})();

@@ -28,6 +28,7 @@ Ingen byggprocess och inga beroenden. Lägg mappen på valfri webbserver.
 ## Listan över beställningar
 
 - Inga mejl skickas (FormSubmit togs bort 26-11-05). Databasen är den enda listan.
+- Besök räknas utan cookies (`atg_v75_besok`: tidpunkt, källa, mobil eller dator, inga IP-adresser). Besök och beställningar per dag: `select * from public.atg_v75_statistik;`
 - Se den i Supabase-panelen: Table Editor, `atg_v75_anmalningar`. Export, CSV, ger en fil för utskicket.
 - Spamfälla (`_honey`) i ett dolt fält: ifylld fälla sparar inget men visar tacksidan.
 - Postnummer kräver fem siffror (`123 45` eller `12345`) och sparas alltid som `123 45`.
